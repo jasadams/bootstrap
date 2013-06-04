@@ -68,11 +68,13 @@ angular.module('ui.bootstrap.collapse',['ui.bootstrap.transition'])
             fixUpHeight(scope, element, 'auto');
           }
         } else {
+					element.css({ 'overflow-y': 'hidden' });
           doTransition({ height : element[0].scrollHeight + 'px' })
           .then(function() {
             // This check ensures that we don't accidentally update the height if the user has closed
             // the group while the animation was still running
             if ( !isCollapsed ) {
+							element.css({ 'overflow-y': 'auto' });
               fixUpHeight(scope, element, 'auto');
             }
           });
@@ -87,6 +89,7 @@ angular.module('ui.bootstrap.collapse',['ui.bootstrap.transition'])
           fixUpHeight(scope, element, 0);
         } else {
           fixUpHeight(scope, element, element[0].scrollHeight + 'px');
+					element.css({ 'overflow-y': 'hidden' });
           doTransition({'height':'0'});
         }
       };
