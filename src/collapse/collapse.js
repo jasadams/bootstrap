@@ -93,8 +93,8 @@ angular.module('ui.bootstrap.collapse',['ui.bootstrap.transition'])
           fixUpHeight(scope, element, 0);
         } else {
           fixUpHeight(scope, element, element[0].scrollHeight + 'px');
-					// unset the overflow-y attribute to allow inherited behaviour
-					element.css({ 'overflow-y': '' });
+					// hide any scrollbar whilst collapsing
+					element.css({ 'overflow-y': 'hidden' });
           doTransition({'height':'0'});
         }
       };
