@@ -68,13 +68,17 @@ angular.module('ui.bootstrap.collapse',['ui.bootstrap.transition'])
             fixUpHeight(scope, element, 'auto');
           }
         } else {
+					// Whilst the element is expanding, we should hide any scrollbars that might appear. 
+					// If the element height is less than the max-height, scrollbars appear then disappear 
+					// during element expansion
 					element.css({ 'overflow-y': 'hidden' });
           doTransition({ height : element[0].scrollHeight + 'px' })
           .then(function() {
             // This check ensures that we don't accidentally update the height if the user has closed
             // the group while the animation was still running
             if ( !isCollapsed ) {
-							element.css({ 'overflow-y': 'auto' });
+							// unset the overflow-y attribute to allow inherited behaviour
+							element.css({ 'overflow-y': '' });
               fixUpHeight(scope, element, 'auto');
             }
           });
@@ -89,7 +93,8 @@ angular.module('ui.bootstrap.collapse',['ui.bootstrap.transition'])
           fixUpHeight(scope, element, 0);
         } else {
           fixUpHeight(scope, element, element[0].scrollHeight + 'px');
-					element.css({ 'overflow-y': 'hidden' });
+					// unset the overflow-y attribute to allow inherited behaviour
+					element.css({ 'overflow-y': '' });
           doTransition({'height':'0'});
         }
       };
