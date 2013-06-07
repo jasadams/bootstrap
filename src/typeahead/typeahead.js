@@ -50,6 +50,12 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position'])
 
       var isLoadingSetter = $parse(attrs.typeaheadLoading).assign || angular.noop;
 
+
+      var popupPlacementTop = false;
+      attrs.$observe( 'typeaheadPlacement', function ( val ) {
+         popupPlacementTop = angular.isDefined( val ) ? (val.toLowerCase() === 'top') : false;
+      });
+
       //pop-up element used to display matches
       var popUpEl = angular.element(
         "<typeahead-popup " +
@@ -83,25 +89,57 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position'])
           if (inputValue === modelCtrl.$viewValue) {
             if (matches.length > 0) {
 
-              scope.activeIdx = 0;
-              scope.matches.length = 0;
-
+              // First remove any items that are no longer in matches
+              var i = scope.matches.length;
+              while (i--) {
+                var matched = false;
+                for(var j=0; j<matches.length; j++) {
+                  if (scope.matches[i].model === matches[j]) {
+                    matched = true;
+                    break;
+                  }
+                }
+                // If not matched remove the item
+                if (!matched) {
+                  scope.matches.splice(i,1);
+                }
+              }
               //transform labels
-              for(var i=0; i<matches.length; i++) {
-                locals[parserResult.itemName] = matches[i];
-                scope.matches.push({
-                  label: parserResult.viewMapper(scope, locals),
-                  model: matches[i]
-                });
+              for(var k=0; k<matches.length; k++) {
+
+                var matchedIndex = -1;
+                for(var l=0; l<scope.matches.length; l++) {
+                  if (scope.matches[l].model === matches[k]) {
+                    matchedIndex = l;
+                    break;
+                  }
+                }
+
+                locals[parserResult.itemName] = matches[k];
+                // If not matched remove the item
+                if (matchedIndex >= 0) {
+                  scope.matches[matchedIndex].label = parserResult.viewMapper(scope, locals);
+                } else {
+                  scope.matches.push({
+                    label: parserResult.viewMapper(scope, locals),
+                    model: matches[k]
+                  });
+                }
               }
 
               scope.query = inputValue;
               //position pop-up with matches - we need to re-calculate its position each time we are opening a window
               //with matches as a pop-up might be absolute-positioned and position of an input might have changed on a page
               //due to other elements being rendered
-              scope.position = $position.position(element);
-              scope.position.top = scope.position.top + element.prop('offsetHeight');
-
+              var position = $position.position(element);
+              scope.position = { left : position.left + 'px' };
+              if (popupPlacementTop) {
+                scope.position.bottom = element.prop('offsetHeight') + 'px';
+                scope.activeIdx = scope.matches.length-1;
+              } else {
+                scope.position.top = position.top + element.prop('offsetHeight') + 'px';
+                scope.activeIdx = 0;
+              }
             } else {
               resetMatches();
             }
@@ -122,12 +160,14 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position'])
       //$parsers kick-in on all the changes coming from the view as well as manually triggered by $setViewValue
       modelCtrl.$parsers.push(function (inputValue) {
 
-        resetMatches();
         if (selected) {
+          resetMatches();
           return inputValue;
         } else {
           if (inputValue && inputValue.length >= minSearch) {
             getMatchesAsync(inputValue);
+          } else {
+            resetMatches();
           }
         }
 
