@@ -164,10 +164,10 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
               //due to other elements being rendered
               scope.position = appendToBody ? $position.offset(element) : $position.position(element);
               if (popupPlacementTop) {
-                scope.position.bottom = element.prop('offsetHeight');
+                scope.position.bottom = element.prop('offsetHeight')+'px';
                 scope.activeIdx = scope.matches.length-1;
               } else {
-                scope.position.top = scope.position.top + element.prop('offsetHeight');
+                scope.position.top = scope.position.top + element.prop('offsetHeight')+'px';
                 scope.activeIdx = 0;
               }
 
